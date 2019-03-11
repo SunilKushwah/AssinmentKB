@@ -10,9 +10,10 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 
 
-class CustomAdapter(private var context: Context, internal var data: ArrayList<AlbumPhoto>) : BaseAdapter() {
+class CustomAdapter(private var context: Context, private var data: ArrayList<AlbumPhoto>) : BaseAdapter() {
 
-    private var inflter: LayoutInflater = LayoutInflater.from(context)
+    private val mInflator: LayoutInflater = LayoutInflater.from(context)
+
     override fun getCount(): Int {
         return data.size
     }
@@ -30,17 +31,28 @@ class CustomAdapter(private var context: Context, internal var data: ArrayList<A
         notifyDataSetChanged()
     }
 
-    override fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
-        var view = view
-        view = inflter.inflate(R.layout.item_layout, null) // inflate the layout
-        val icon = view.findViewById(R.id.icon) as ImageView
-        val title = view.findViewById(R.id.title) as TextView
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view: View?
+        val vh: ListRowHolder
+        if (convertView == null) {
+            view = this.mInflator.inflate(R.layout.item_layout, parent, false)
+            vh = ListRowHolder(view)
+            view.tag = vh
+        } else {
+            view = convertView
+            vh = view.tag as ListRowHolder
+        }
         Glide.with(context)
-                .load(data.get(i).thumbnailUrl)
+                .load(data[position].thumbnailUrl)
                 .centerCrop()
                 .placeholder(R.drawable.ic_launcher_background)
-                .into(icon);
-        title.text =  data.get(i).title
-        return view
+                .into(vh.icon)
+        vh.title.text = data[position].title
+        return view!!
+    }
+
+    inner class ListRowHolder(row: View?) {
+         val icon: ImageView = row?.findViewById(R.id.icon) as ImageView
+         val title: TextView = row?.findViewById(R.id.title) as TextView
     }
 }

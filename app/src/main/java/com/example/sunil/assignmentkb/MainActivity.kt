@@ -30,7 +30,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        tabLayout = findViewById<View>(R.id.tabs) as TabLayout
         getAlbums()
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -72,26 +71,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getAlbums() {
-
         val retrofit = Retrofit.Builder()
                 .baseUrl(ApiRequest.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
-
         val api = retrofit.create(ApiRequest::class.java)
-
         val call = api.albums
-
         call.enqueue(object : Callback<List<Album>> {
             override fun onResponse(call: Call<List<Album>>, response: Response<List<Album>>) {
-                albums = response.body()!!
-                val albumTitles = arrayOfNulls<String>(albums!!.size)
-                NO_OF_TABS = albums!!.size
-                for (i in albums.indices) {
-                    albumTitles[i] = albums[i].title
-                    tabLayout.addTab(tabLayout.newTab().setText(albums[i].title))
-                }
-                setUpTabLayout()
+                parseResponse(response)
             }
 
             override fun onFailure(call: Call<List<Album>>, t: Throwable) {
@@ -100,5 +88,16 @@ class MainActivity : AppCompatActivity() {
         })
 
 
+    }
+
+    private fun parseResponse(response: Response<List<Album>>) {
+        albums = response.body()!!
+        val albumTitles = arrayOfNulls<String>(albums!!.size)
+        NO_OF_TABS = albums!!.size
+        for (i in albums.indices) {
+            albumTitles[i] = albums[i].title
+            tabs.addTab(tabs.newTab().setText(albums[i].title))
+        }
+        setUpTabLayout()
     }
 }
